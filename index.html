@@ -9,9 +9,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
 <style>
     :root {
-        --primary: #0F172A; /* Deep Slate */
+        --primary: #0F172A;
         --primary-light: #1E293B;
-        --accent: #D4AF37; /* Gold */
+        --accent: #D4AF37;
         --accent-hover: #B8962E;
         --bg: #F8FAFC;
         --surface: #FFFFFF;
@@ -532,7 +532,7 @@
     <div class="modal-content">
         <button type="button" class="close-btn" onclick="closeModal('adminModal')">&times;</button>
 
-        <!-- LOGIN -->
+        <!-- LOGIN AREA (Shown by default) -->
         <div id="loginArea">
             <h2 style="text-align:center; margin-bottom: 1.5rem; color: var(--primary);">🔐 Admin Login</h2>
             <form id="loginForm">
@@ -541,11 +541,10 @@
                 </div>
                 <button type="submit" class="btn btn-primary btn-full">Login</button>
             </form>
-            <!-- Password hint removed for security -->
         </div>
 
-        <!-- DASHBOARD -->
-        <div id="adminContent" class="hidden">
+        <!-- DASHBOARD AREA (Hidden until login) -->
+        <div id="adminContent" style="display: none;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                 <h2 style="color: var(--primary);">⚙️ Dashboard</h2>
                 <button type="button" class="btn btn-danger btn-sm" id="logoutBtn">Logout</button>
@@ -755,14 +754,14 @@ document.addEventListener('keydown', function (e) {
 });
 
 /* =========================================================
-   IMAGE HANDLING (Aggressive Compression to prevent memory crash)
+   IMAGE HANDLING
    ========================================================= */
 var imageFileInput = document.getElementById('productImageFile');
 var imageUrlInput  = document.getElementById('productImageUrl');
 var imagePreview   = document.getElementById('imagePreview');
 var imagePreviewBox = document.getElementById('imagePreviewBox');
 var selectedImageData = null;
-var currentImageSource = 'file'; // 'file' or 'url'
+var currentImageSource = 'file';
 
 function switchImageTab(source) {
     currentImageSource = source;
@@ -772,15 +771,15 @@ function switchImageTab(source) {
     var tabUrlBtn = document.getElementById('tabUrlBtn');
 
     if (source === 'file') {
-        fileArea.classList.remove('hidden');
-        urlArea.classList.add('hidden');
+        fileArea.style.display = 'block';
+        urlArea.style.display = 'none';
         tabFileBtn.style.background = 'var(--primary)';
         tabFileBtn.style.color = 'white';
         tabUrlBtn.style.background = '#e2e8f0';
         tabUrlBtn.style.color = 'var(--text)';
     } else {
-        fileArea.classList.add('hidden');
-        urlArea.classList.remove('hidden');
+        fileArea.style.display = 'none';
+        urlArea.style.display = 'block';
         tabUrlBtn.style.background = 'var(--primary)';
         tabUrlBtn.style.color = 'white';
         tabFileBtn.style.background = '#e2e8f0';
@@ -808,7 +807,6 @@ function updatePreview() {
     }
 }
 
-// Compress image aggressively to prevent mobile memory crash
 function compressImage(file) {
     return new Promise(function (resolve, reject) {
         if (!file.type.startsWith('image/')) {
@@ -822,7 +820,6 @@ function compressImage(file) {
             var img = new Image();
             img.onerror = function () { reject(new Error('Invalid image data')); };
             img.onload = function () {
-                // Aggressive: Max width 600px, quality 0.7
                 var maxWidth = 600;
                 var scale = Math.min(1, maxWidth / img.width);
                 var w = Math.max(1, Math.round(img.width * scale));
@@ -837,7 +834,6 @@ function compressImage(file) {
                 ctx.fillRect(0, 0, w, h);
                 ctx.drawImage(img, 0, 0, w, h);
 
-                // Compress to JPEG at 70% quality
                 resolve(canvas.toDataURL('image/jpeg', 0.7));
             };
             img.src = reader.result;
@@ -954,8 +950,8 @@ document.querySelectorAll('.tab-btn').forEach(function (btn) {
         document.querySelectorAll('.tab-btn').forEach(function (b) { b.classList.remove('active'); });
         btn.classList.add('active');
         var showProducts = btn.dataset.tab === 'products';
-        document.getElementById('productsTab').classList.toggle('hidden', !showProducts);
-        document.getElementById('ordersTab').classList.toggle('hidden', showProducts);
+        document.getElementById('productsTab').style.display = showProducts ? 'block' : 'none';
+        document.getElementById('ordersTab').style.display = showProducts ? 'none' : 'block';
         if (!showProducts) renderOrders();
     });
 });
@@ -967,6 +963,7 @@ document.getElementById('adminLink').addEventListener('click', function (e) {
 });
 
 function checkLogin() {
+    // Check if the user is already logged in via sessionStorage
     if (sessionStorage.getItem(SS_LOGIN) === 'yes') {
         showAdminArea();
     } else {
@@ -975,13 +972,17 @@ function checkLogin() {
 }
 
 function showLoginArea() {
-    document.getElementById('loginArea').classList.remove('hidden');
-    document.getElementById('adminContent').classList.add('hidden');
+    // Strictly show login, hide dashboard
+    document.getElementById('loginArea').style.display = 'block';
+    document.getElementById('adminContent').style.display = 'none';
+    // Clear any previous password input
+    document.getElementById('adminPassword').value = '';
 }
 
 function showAdminArea() {
-    document.getElementById('loginArea').classList.add('hidden');
-    document.getElementById('adminContent').classList.remove('hidden');
+    // Strictly hide login, show dashboard
+    document.getElementById('loginArea').style.display = 'none';
+    document.getElementById('adminContent').style.display = 'block';
     renderAdminProducts();
 }
 
@@ -989,8 +990,8 @@ document.getElementById('loginForm').addEventListener('submit', function (e) {
     e.preventDefault();
     if (document.getElementById('adminPassword').value === getPassword()) {
         sessionStorage.setItem(SS_LOGIN, 'yes');
-        document.getElementById('adminPassword').value = '';
         showAdminArea();
+        showToast('Logged in successfully!', 'success');
     } else {
         showToast('Wrong password!', 'error');
     }
@@ -999,9 +1000,9 @@ document.getElementById('loginForm').addEventListener('submit', function (e) {
 document.getElementById('logoutBtn').addEventListener('click', function () {
     sessionStorage.removeItem(SS_LOGIN);
     showLoginArea();
+    showToast('Logged out', 'success');
 });
 
-// Change Password
 document.getElementById('changePassBtn').addEventListener('click', function () {
     var newPass = prompt('Enter new admin password (min 4 characters):');
     if (!newPass) return;
@@ -1062,11 +1063,10 @@ function startEdit(id) {
     }
     catSelect.value = product.category;
 
-    // Reset image state
     imageFileInput.value = '';
     imageUrlInput.value = '';
-    selectedImageData = product.image; // Use existing image as fallback
-    currentImageSource = 'file'; // Default to file tab
+    selectedImageData = product.image;
+    currentImageSource = 'file';
     switchImageTab('file');
     updatePreview();
 
@@ -1250,4 +1250,4 @@ renderProducts();
 </script>
 
 </body>
-        </html>
+            </html>
