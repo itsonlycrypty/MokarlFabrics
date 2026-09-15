@@ -541,7 +541,7 @@
                 </div>
                 <button type="submit" class="btn btn-primary btn-full">Login</button>
             </form>
-            <p style="text-align:center; margin-top: 1rem; font-size: 0.8rem; color: var(--text-muted);">Default password: 2444</p>
+            <!-- Password hint removed for security -->
         </div>
 
         <!-- DASHBOARD -->
@@ -626,6 +626,7 @@
             <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                 <button type="button" class="btn btn-sm" style="background: #64748b; color: white;" id="exportBtn">📤 Export</button>
                 <button type="button" class="btn btn-sm btn-success" id="importBtn">📥 Import</button>
+                <button type="button" class="btn btn-sm" style="background: #6c757d; color: white;" id="changePassBtn">🔑 Change Pass</button>
                 <button type="button" class="btn btn-sm btn-danger" id="resetBtn">🔄 Reset Data</button>
             </div>
         </div>
@@ -1000,6 +1001,18 @@ document.getElementById('logoutBtn').addEventListener('click', function () {
     showLoginArea();
 });
 
+// Change Password
+document.getElementById('changePassBtn').addEventListener('click', function () {
+    var newPass = prompt('Enter new admin password (min 4 characters):');
+    if (!newPass) return;
+    if (newPass.length < 4) {
+        showToast('Password must be at least 4 characters.', 'error');
+        return;
+    }
+    localStorage.setItem(LS_PASS, newPass);
+    showToast('Password updated successfully!', 'success');
+});
+
 function renderAdminProducts() {
     var products = getProducts();
     var list = document.getElementById('adminProductList');
@@ -1237,4 +1250,4 @@ renderProducts();
 </script>
 
 </body>
-                   </html>
+        </html>
